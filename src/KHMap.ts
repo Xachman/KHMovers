@@ -16,7 +16,12 @@ export class KHMap {
         //.openPopup();
 
         globalThis.khMap = this
-        this.getData()
+
+
+    }
+
+    setMarkers() {
+
     }
 
     getMap() {
@@ -24,8 +29,14 @@ export class KHMap {
     }
 
     getData() {
-        let data = ipcRenderer.sendSync('get-movers')
-        console.log(data)
+        return ipcRenderer.sendSync('get-movers')
+    }
+
+    addMover(name, address) {
+        ipcRenderer.sendSync('add-mover', {
+            name: name,
+            address: address
+        })
     }
 }
 

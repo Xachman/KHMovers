@@ -21,21 +21,23 @@ export class Storage {
             fs.writeFileSync(this.storePath, '[]')
         }
         ipc.on('get-movers', (event, arg) => {  event.returnValue = this.getMovers() })
+        ipc.on('add-mover', (event, arg) => {  this.addMover(arg.name, arg.address) })
     }
 
-	addMover(data) {
+	addMover(name, address) {
         let movers = this.getMovers()
         movers.push({
-            name: data.name,
-            address: data.address
+            name: name,
+            address: address
         })
+        this.setMovers(movers)
 	}
 
 	getMovers() : Array<any> {
         return JSON.parse(fs.readFileSync(this.storePath).toString())
 	}
 
-    setMovers() {
-
+    setMovers(movers) {
+        fs.writeFileSync(this.storePath, JSON.stringify(movers))
     }
 }
