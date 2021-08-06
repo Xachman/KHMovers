@@ -1,4 +1,6 @@
 const leaflet = require('leaflet');
+var ipcRenderer = require('electron').ipcRenderer;
+
 export class KHMap {
     private map;
     display() {
@@ -12,10 +14,18 @@ export class KHMap {
         //leaflet.marker([51.5, -0.09]).addTo(this.map)
         //.bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
         //.openPopup();
+
+        globalThis.khMap = this
+        this.getData()
     }
 
     getMap() {
         return this.map
+    }
+
+    getData() {
+        let data = ipcRenderer.sendSync('get-movers')
+        console.log(data)
     }
 }
 

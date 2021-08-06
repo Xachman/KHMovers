@@ -1,6 +1,10 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 import {KHMap} from './KHMap'
+import {Storage} from './Storage'
+const ipc = require('electron').ipcMain
+
+let storage = new Storage(ipc)
 
 let hi = "hi"
 
