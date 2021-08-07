@@ -11,9 +11,6 @@ export class KHMap {
         leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         }).addTo(this.map);
-        //leaflet.marker([51.5, -0.09]).addTo(this.map)
-        //.bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-        //.openPopup();
 
         globalThis.khMap = this
 
@@ -28,7 +25,7 @@ export class KHMap {
         return this.map
     }
 
-    getData() {
+    getMovers() {
         return ipcRenderer.sendSync('get-movers')
     }
 
@@ -38,6 +35,11 @@ export class KHMap {
             address: address
         })
     }
-
+    addMarkers() {
+        this.getMovers().forEach(mover => {
+            leaflet.marker([mover.latitude, mover.longitude]).addTo(this.map)
+            .bindPopup(mover.name+'<br>'+mover.address)
+        });
+    }
 }
 
