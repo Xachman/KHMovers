@@ -1,7 +1,11 @@
-const homedir = require('os').homedir();
-const path = require('path');
+const homedir = require('os').homedir()
+const path = require('path')
 import * as fs from 'fs'
-const exceljs = require('exceljs');
+const exceljs = require('exceljs')
+const https = require('https')
+const request = require('request')
+const CryptoJS = require("crypto-js")
+
 
 
 export class Storage {
@@ -22,17 +26,20 @@ export class Storage {
             fs.writeFileSync(this.storePath, '[]')
         }
         ipc.on('get-movers', (event, arg) => {  event.returnValue = this.getMovers() })
-        ipc.on('add-mover', (event, arg) => {  this.addMover(arg.name, arg.address, arg.truck) })
-        this.setMovers([])
         this.addSheetData()
     }
 
-	addMover(name, address, truck: boolean) {
+	addMover(name, address, truck: boolean, latitude, longitude) {
         let movers = this.getMovers()
+        var hash = CryptoJS.SHA256(name+address).toString()
+
         movers.push({
             name: name,
             address: address,
-            truck: truck
+            truck: truck,
+            latitude: latitude,
+            longitude: longitude,
+            hash: hash
         })
         this.setMovers(movers)
 	}
@@ -44,13 +51,18 @@ export class Storage {
     setMovers(movers) {
         fs.writeFileSync(this.storePath, JSON.stringify(movers))
     }
-
+    findMover(hash) {
+        let movers = this.getMovers()
+        return movers.filter(mover => mover.hash == hash)[0]
+    }
     addSheetData() {
         var workbook = new exceljs.Workbook()
         let bannerCount = 0
+        let count = 0;
         let withTruck = true
-        let data = workbook.xlsx.readFile("C:\\Users\\ziron\\Documents\\DRIVER INFOMATION SHEET (1).xlsx").then(workbook => {
+        workbook.xlsx.readFile(homedir+"\\Documents\\DRIVER INFOMATION SHEET (1).xlsx").then(workbook => {
             workbook.getWorksheet(1).eachRow({}, (row, rowNumber) => {
+                count++
                 if(rowNumber == 1) {
                     return
                 }
@@ -66,10 +78,45 @@ export class Storage {
                 }
                 let name = row.getCell(2).value+" "+row.getCell(1).value
                 let address = row.getCell(4).value+" "+row.getCell(5).value+", "+row.getCell(6)+" "+row.getCell(7)
+                let hash = CryptoJS.SHA256(name+address).toString()
+                if(this.findMover(hash)) {
+                    return
+                }
+                this.search(address, count>10? 1000: 0).then( (data: any) => {
+                    console.log(data)
+                    this.addMover(name, address, withTruck, data.latitude, data.longitude)
+                })
                 
-                this.addMover(name, address, withTruck)
                 
             })
+        });
+    }
+    async search(address, delay) {
+        return new Promise((resolve, reject) => {
+            let options = {
+                uri: "https://api.radar.io/v1/search/autocomplete?query="+encodeURIComponent(address),
+                method: 'GET',
+                headers: {
+                'Authorization': 'prj_live_pk_97c9f560f22df75c0c52fe138b9cb0114deb8f70'
+                }
+            };
+//            const options = {
+//  hostname: 'example.com',
+//  port: 443,
+//  path: '/todos',
+//  method: 'GET'
+//}
+            setTimeout(() => {
+                request(options, (error, response, body) => {
+                    if(error) {
+                        reject(error)
+                    }
+                    if (response.statusCode != 200) {
+                        reject('Invalid status code <' + response.statusCode + '>'); 
+                    }
+                    resolve(JSON.parse(body).addresses[0]);
+                });
+            }, delay)
         });
     }
 }
