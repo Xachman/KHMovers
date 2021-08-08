@@ -13,6 +13,7 @@ export class KHMap {
         }).addTo(this.map);
 
         globalThis.khMap = this
+        this.addMarkers()
 
 
     }
@@ -36,8 +37,24 @@ export class KHMap {
         })
     }
     addMarkers() {
+        var greenIcon = new leaflet.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+        var yellowIcon = new leaflet.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
         this.getMovers().forEach(mover => {
-            leaflet.marker([mover.latitude, mover.longitude]).addTo(this.map)
+            leaflet.marker([mover.latitude, mover.longitude], {icon: mover.truck? greenIcon: yellowIcon}).addTo(this.map)
             .bindPopup(mover.name+'<br>'+mover.address)
         });
     }

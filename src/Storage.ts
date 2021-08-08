@@ -59,9 +59,9 @@ export class Storage {
         var workbook = new exceljs.Workbook()
         let bannerCount = 0
         let count = 0;
-        let withTruck = true
         workbook.xlsx.readFile(homedir+"\\Documents\\DRIVER INFOMATION SHEET (1).xlsx").then(workbook => {
             workbook.getWorksheet(1).eachRow({}, (row, rowNumber) => {
+                let withTruck = true
                 count++
                 if(rowNumber == 1) {
                     return
@@ -83,7 +83,7 @@ export class Storage {
                     return
                 }
                 this.search(address, count>10? 1000: 0).then( (data: any) => {
-                    console.log(data)
+                    console.log()
                     this.addMover(name, address, withTruck, data.latitude, data.longitude)
                 })
                 
