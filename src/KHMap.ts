@@ -1,8 +1,10 @@
 const leaflet = require('leaflet');
 var ipcRenderer = require('electron').ipcRenderer;
+let request = require('request')
 
 export class KHMap {
     private map;
+    private searchMarker;
     display() {
         this.map = leaflet.map('map', {
             center: [40.348, -79.055],
@@ -14,11 +16,8 @@ export class KHMap {
 
         globalThis.khMap = this
         this.addMarkers()
+        this.setSearchButton()
 
-
-    }
-
-    setMarkers() {
 
     }
 
@@ -57,6 +56,47 @@ export class KHMap {
             leaflet.marker([mover.latitude, mover.longitude], {icon: mover.truck? greenIcon: yellowIcon}).addTo(this.map)
             .bindPopup(mover.name+'<br>'+mover.address)
         });
+    }
+
+    setSearchButton() {
+        var blueIcon = new leaflet.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+        document.querySelector('#searchButton').addEventListener('click', (event) => {
+            event.preventDefault();
+            let text = (document.querySelector('#searchInput')  as HTMLInputElement).value
+            console.log(text)
+            let options = {
+                uri: "https://api.radar.io/v1/search/autocomplete?query="+encodeURIComponent(text),
+                method: 'GET',
+                headers: {
+                'Authorization': 'prj_live_pk_97c9f560f22df75c0c52fe138b9cb0114deb8f70'
+                }
+            };
+            request(options, (error, response, body) => {
+                if(error) {
+                    console.log(error)
+                    return
+                }
+                if (response.statusCode != 200) {
+                    console.log('Invalid status code <' + response.statusCode + '>'); 
+                    return
+                }
+                let json = JSON.parse(body)
+                let latitude = json.addresses[0].latitude
+                let longitude = json.addresses[0].longitude
+                if(this.searchMarker) {
+                    this.getMap().removeLayer(this.searchMarker)
+                }
+                this.searchMarker = leaflet.marker([latitude, longitude], blueIcon).addTo(this.map)
+            });
+        })
+
     }
 }
 
