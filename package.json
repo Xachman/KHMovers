@@ -2,27 +2,29 @@
   "name": "khmovers",
   "version": "1.0.0",
   "description": "Kingdom Hall Movers Mapping App",
-  "main": "main.js",
+  "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "copy-files": "copyfiles -a ./assets/* ./assets/images/* ./dist/",
-    "start": "npm run build && npm run copy-files && electron ./dist/main.js"
+    "start": "npm run build && electron ./",
+    "package": "npm run build && electron-packager ./ KHMovers --platform=win32 --arch=x64 --overwrite"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "copyfiles": "^2.4.1",
-    "crypto-js": "^4.1.1",
     "electron": "13.1.7",
-    "exceljs": "^4.2.1",
-    "leaflet": "^1.7.1",
+    "electron-packager": "^15.3.0",
     "osm": "^1.0.0",
-    "request": "^2.88.2",
     "typescript": "^4.3.5",
     "xlsx": "^0.17.0"
   },
   "dependencies": {
-    "radar-sdk-js": "^3.0.1"
+    "crypto-js": "^4.1.1",
+    "exceljs": "^4.2.1",
+    "geodist": "^0.2.1",
+    "leaflet": "^1.7.1",
+    "radar-sdk-js": "^3.0.1",
+    "request": "^2.88.2"
   }
 }

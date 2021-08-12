@@ -1,6 +1,7 @@
 const leaflet = require('leaflet');
 var ipcRenderer = require('electron').ipcRenderer;
 let request = require('request')
+let geodist = require('geodist')
 
 export class KHMap {
     private map;
@@ -94,9 +95,39 @@ export class KHMap {
                     this.getMap().removeLayer(this.searchMarker)
                 }
                 this.searchMarker = leaflet.marker([latitude, longitude], blueIcon).addTo(this.map)
+                this.listByDistance(latitude, longitude)
             });
         })
 
+    }
+
+    listByDistance(lat, lon) {
+        let moversList = this.getMovers()
+        moversList.forEach( item => {
+            item.distance = geodist({lat: lat, lon: lon}, {lat: item.latitude, long: item.longitude})
+        }) 
+        moversList.sort((first, second) => {
+
+            return first.distance - second.distance
+        })
+
+        console.log(moversList)
+        this.displayMovers(moversList)
+
+    }
+
+    displayMovers(movers) {
+        let el = document.querySelector("#searchOutput")
+        let html = ""
+        movers.forEach(element => {
+            html+="<div>"+element.name+"</div>"
+            html+="<div>"+element.address+"</div>"
+            html+="<div>"+element.distance+" Miles</div>"
+            html+="<br>"
+            
+        });
+
+        el.innerHTML = html
     }
 }
 
