@@ -1,12 +1,9 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, Menu, dialog } = require('electron')
 const path = require('path')
 import {KHMap} from './KHMap'
 import {Storage} from './Storage'
-const ipc = require('electron').ipcMain
 
-let storage = new Storage(ipc)
 
-let hi = "hi"
 
 function createWindow () {
   const win = new BrowserWindow({
@@ -19,6 +16,27 @@ function createWindow () {
       preload: path.join(__dirname, 'preload.js')
     }
   })
+
+  let storage = new Storage(win.webContents.send)
+
+  let menu = Menu.buildFromTemplate([
+      {
+          label: 'File',
+          submenu: [
+            {
+              label:'Select Sheet',
+              click() {
+                dialog.showOpenDialog({ properties: ['openFile']}).then( file => {
+                  if(!file.canceled) {
+                    storage.setSheetPath(file.filePaths[0])
+                  }
+                })
+              }
+            }
+          ]
+      }
+  ])
+  Menu.setApplicationMenu(menu); 
 
   win.loadFile('assets/index.html')
 }

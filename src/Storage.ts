@@ -5,28 +5,21 @@ const exceljs = require('exceljs')
 const https = require('https')
 const request = require('request')
 const CryptoJS = require("crypto-js")
-
-
+const settings = require('electron-settings');
+const ipc = require('electron').ipcMain
 
 export class Storage {
-    private directory: string = homedir+path.sep+".khmovers"
-    private dataDirectory: string = homedir+path.sep+".khmovers"+path.sep+"data"
-    private storePath: string = homedir+path.sep+".khmovers"+path.sep+"data"+path.sep+"data.json"
+    private sendEvent;
 
-    constructor(ipc) {
-        if (!fs.existsSync(this.directory)){
-            fs.mkdirSync(this.directory);
+    constructor(sendEvent) {
+        this.sendEvent = sendEvent;
+        if(!settings.hasSync('movers')) {
+            settings.setSync('movers', [])
         }
-        if (!fs.existsSync(this.dataDirectory)){
-            fs.mkdirSync(this.dataDirectory);
+        if(settings.hasSync('sheetPath')) {
+            ipc.on('get-movers', (event, arg) => {  event.returnValue = this.getMovers() })
+            this.addSheetData()
         }
-        try {
-            fs.readFileSync(this.storePath)
-        } catch (error) {
-            fs.writeFileSync(this.storePath, '[]')
-        }
-        ipc.on('get-movers', (event, arg) => {  event.returnValue = this.getMovers() })
-        this.addSheetData()
     }
 
 	addMover(name, address, truck: boolean, latitude, longitude) {
@@ -45,21 +38,28 @@ export class Storage {
 	}
 
 	getMovers() : Array<any> {
-        return JSON.parse(fs.readFileSync(this.storePath).toString())
+        return settings.getSync('movers')
 	}
 
     setMovers(movers) {
-        fs.writeFileSync(this.storePath, JSON.stringify(movers))
+        settings.setSync('movers', movers)
     }
     findMover(hash) {
         let movers = this.getMovers()
         return movers.filter(mover => mover.hash == hash)[0]
     }
+    setSheetPath(path) {
+        console.log(settings.setSync('sheetPath', {path: path}))
+        this.addSheetData()
+    }
+    getSheetPath(): string {
+        return settings.getSync('sheetPath').path
+    }
     addSheetData() {
         var workbook = new exceljs.Workbook()
         let bannerCount = 0
         let count = 0;
-        workbook.xlsx.readFile(homedir+"\\Documents\\DRIVER INFOMATION SHEET (1).xlsx").then(workbook => {
+        workbook.xlsx.readFile(this.getSheetPath()).then(workbook => {
             workbook.getWorksheet(1).eachRow({}, (row, rowNumber) => {
                 let withTruck = true
                 count++
@@ -85,6 +85,7 @@ export class Storage {
                 this.search(address, count>10? 1000: 0).then( (data: any) => {
                     console.log()
                     this.addMover(name, address, withTruck, data.latitude, data.longitude)
+                    this.sendEvent('add-movers')
                 })
                 
                 
@@ -100,12 +101,6 @@ export class Storage {
                 'Authorization': 'prj_live_pk_97c9f560f22df75c0c52fe138b9cb0114deb8f70'
                 }
             };
-//            const options = {
-//  hostname: 'example.com',
-//  port: 443,
-//  path: '/todos',
-//  method: 'GET'
-//}
             setTimeout(() => {
                 request(options, (error, response, body) => {
                     if(error) {

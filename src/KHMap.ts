@@ -18,8 +18,9 @@ export class KHMap {
         globalThis.khMap = this
         this.addMarkers()
         this.setSearchButton()
-
-
+        ipcRenderer.on('add-markers', () => {
+            this.addMarkers()
+        })
     }
 
     getMap() {

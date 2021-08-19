@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/electron": "^1.6.10",
     "copyfiles": "^2.4.1",
     "electron": "13.1.7",
     "electron-packager": "^15.3.0",
@@ -21,6 +22,7 @@
   },
   "dependencies": {
     "crypto-js": "^4.1.1",
+    "electron-settings": "^4.0.2",
     "exceljs": "^4.2.1",
     "geodist": "^0.2.1",
     "leaflet": "^1.7.1",
