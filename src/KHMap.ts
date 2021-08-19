@@ -120,13 +120,15 @@ export class KHMap {
         let el = document.querySelector("#searchOutput")
         let html = ""
         movers.forEach(element => {
-            html+="<div>"+element.name+"</div>"
+            console.log(element)
+            html+="<div class=\"mover-box "+(element.truck? "truck": "")+"\">"
+            html+="<strong>"+element.name+"</strong>"
             html+="<div>"+element.address+"</div>"
             html+="<div>"+element.distance+" Miles</div>"
-            html+="<br>"
+            html+="</div>"
             
         });
-
+        console.log(html)
         el.innerHTML = html
     }
 }

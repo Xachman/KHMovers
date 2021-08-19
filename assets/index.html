@@ -15,26 +15,61 @@
 
       }
       .map-gutters {
-        padding-left: 0
+        padding: 0
+      }
+      .scroll-container {
+        position: relative;
+
+      }
+      #searchOutput {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 100%;
+      }
+      .main {
+        max-width: 100%;
+      }
+      .mover-box {
+        background-color: rgb(241, 241, 156);
+        padding: 10px;
+        margin-bottom: 4px
+      }
+
+      .mover-box.truck {
+        background-color: rgb(160, 207, 132);
+      }
+      .search-bar {
+        padding: 5px;
+        margin: 0
+      }
+      .sidebar {
+        background-color: rgb(218, 218, 218);
+        overflow: scroll
       }
     </style>
   </head>
   <body>
-    <div class="container no-gutters">
+    <div class="container no-gutters main">
+    <div class="row search-bar">
+      <div class="col">
+        <form>
+          <div class="input-group">
+            <input type="text" class="form-control form-control-sm" id="searchInput" aria-describedby="searchHelp" placeholder="Search">
+            <span type="submit" id="searchButton" class="btn btn-primary btn-sm">Submit</span>
+          </div>
+        </form>
+      </div>
+    </div>
     <div class="row no-gutters">
-      <div class="col-10 map-gutters">
+      <div class="col-9 map-gutters">
         <div id="map" style="height: 600px;"></div>
       </div>
-      <div class="col">
-        <br>
-        <form>
-          <div class="form-group">
-            <input type="text" class="form-control form-control-sm" id="searchInput" aria-describedby="searchHelp" placeholder="Search">
-          </div>
-          <br>
-          <button type="submit" id="searchButton" class="btn btn-primary btn-sm">Submit</button>
-        </form>
-        <div id="searchOutput"></div>
+      <div class="col sidebar">
+        <div class="scroll-container">
+          <div id="searchOutput"></div>
+        </div>
       </div>
     </div>
   </body>
