@@ -22,7 +22,7 @@ export class Storage {
         }
     }
 
-	addMover(name, address, truck: boolean, latitude, longitude) {
+	addMover(name, address, truck: boolean, phone, latitude, longitude) {
         let movers = this.getMovers()
         var hash = CryptoJS.SHA256(name+address).toString()
 
@@ -30,6 +30,7 @@ export class Storage {
             name: name,
             address: address,
             truck: truck,
+            phone: phone,
             latitude: latitude,
             longitude: longitude,
             hash: hash
@@ -50,6 +51,7 @@ export class Storage {
     }
     setSheetPath(path) {
         console.log(settings.setSync('sheetPath', {path: path}))
+        settings.setSync('movers', [])
         this.addSheetData()
     }
     getSheetPath(): string {
@@ -59,33 +61,43 @@ export class Storage {
         var workbook = new exceljs.Workbook()
         let bannerCount = 0
         let count = 0;
+        let cell = {
+            "firstName": 2,
+            "lastName": 1,
+            "phone": 5,
+            "address": 6,
+            "city": 7,
+            "state": 8,
+            "zip": 9,
+            "driver": 4,
+            "available": 3,
+        }
         workbook.xlsx.readFile(this.getSheetPath()).then(workbook => {
             workbook.getWorksheet(1).eachRow({}, (row, rowNumber) => {
-                let withTruck = true
                 count++
                 if(rowNumber == 1) {
                     return
                 }
-                if(row.getCell(1).value.startsWith("DRIVER")) {
-                    bannerCount++
+                if(!row.getCell(cell.address).value) {
                     return
                 }
-                if(bannerCount > 1) {
-                    withTruck = false
-                }
-                if(!row.getCell(4).value) {
+                if(!row.getCell(cell.available).value || row.getCell(cell.available).value != "Y") {
                     return
                 }
-                let name = row.getCell(2).value+" "+row.getCell(1).value
-                let address = row.getCell(4).value+" "+row.getCell(5).value+", "+row.getCell(6)+" "+row.getCell(7)
+                let withTruck = (row.getCell(cell.driver) == "DWE")? true: false; 
+                let name = row.getCell(cell.firstName).value+" "+row.getCell(cell.lastName).value
+                let address = row.getCell(cell.address).value+" "+row.getCell(cell.city).value+", "+row.getCell(cell.state)+" "+row.getCell(cell.zip)
+                let phone =  row.getCell(cell.phone).value
                 let hash = CryptoJS.SHA256(name+address).toString()
                 if(this.findMover(hash)) {
                     return
                 }
                 this.search(address, count>10? 1000: 0).then( (data: any) => {
-                    console.log()
-                    this.addMover(name, address, withTruck, data.latitude, data.longitude)
+                    console.log(data)
+                    this.addMover(name, address, withTruck, phone, data.latitude, data.longitude)
                     this.sendEvent('add-movers')
+                }).catch(err => {
+                    console.log(err)
                 })
                 
                 

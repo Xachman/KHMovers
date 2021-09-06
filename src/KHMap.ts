@@ -125,6 +125,7 @@ export class KHMap {
             html+="<div class=\"mover-box "+(element.truck? "truck": "")+"\">"
             html+="<strong>"+element.name+"</strong>"
             html+="<div>"+element.address+"</div>"
+            html+="<div>"+element.phone+"</div>"
             html+="<div>"+element.distance+" Miles</div>"
             html+="</div>"
             
