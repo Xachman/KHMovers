@@ -6,6 +6,7 @@ let geodist = require('geodist')
 export class KHMap {
     private map;
     private searchMarker;
+    private moversMarkers = [];
     display() {
         this.map = leaflet.map('map', {
             center: [40.348, -79.055],
@@ -54,9 +55,12 @@ export class KHMap {
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
         });
+        this.moversMarkers.forEach(marker => {
+            this.getMap().removeLayer(marker) 
+        })
         this.getMovers().forEach(mover => {
-            leaflet.marker([mover.latitude, mover.longitude], {icon: mover.truck? greenIcon: yellowIcon}).addTo(this.map)
-            .bindPopup(mover.name+'<br>'+mover.address)
+            this.moversMarkers.push(leaflet.marker([mover.latitude, mover.longitude], {icon: mover.truck? greenIcon: yellowIcon}).addTo(this.map)
+            .bindPopup(mover.name+'<br>'+mover.address))
         });
     }
 

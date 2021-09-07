@@ -9,10 +9,9 @@ const settings = require('electron-settings');
 const ipc = require('electron').ipcMain
 
 export class Storage {
-    private sendEvent;
-
-    constructor(sendEvent) {
-        this.sendEvent = sendEvent;
+    private webContents;
+    constructor(webContents) {
+        this.webContents = webContents;
         if(!settings.hasSync('movers')) {
             settings.setSync('movers', [])
         }
@@ -45,6 +44,9 @@ export class Storage {
     setMovers(movers) {
         settings.setSync('movers', movers)
     }
+    sendEvent(event) {
+        this.webContents.send(event)
+    }
     findMover(hash) {
         let movers = this.getMovers()
         return movers.filter(mover => mover.hash == hash)[0]
@@ -57,9 +59,14 @@ export class Storage {
     getSheetPath(): string {
         return settings.getSync('sheetPath').path
     }
+    rebuild() {
+        settings.setSync('movers', [])
+        this.sendEvent('add-markers')
+        console.log(this.sendEvent)
+        this.addSheetData()
+    }
     addSheetData() {
         var workbook = new exceljs.Workbook()
-        let bannerCount = 0
         let count = 0;
         let cell = {
             "firstName": 2,
@@ -95,11 +102,9 @@ export class Storage {
                 this.search(address, count>10? 1000: 0).then( (data: any) => {
                     console.log(data)
                     this.addMover(name, address, withTruck, phone, data.latitude, data.longitude)
-                    this.sendEvent('add-movers')
-                }).catch(err => {
-                    console.log(err)
-                })
-                
+                    console.log(this.sendEvent)
+                    this.sendEvent('add-markers')
+                })                
                 
             })
         });

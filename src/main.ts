@@ -16,8 +16,8 @@ function createWindow () {
       preload: path.join(__dirname, 'preload.js')
     }
   })
-
-  let storage = new Storage(win.webContents.send)
+  win.webContents.send('add-markers')
+  let storage = new Storage(win.webContents)
 
   let menu = Menu.buildFromTemplate([
       {
@@ -32,8 +32,20 @@ function createWindow () {
                   }
                 })
               }
+            },
+            {
+              label:'Rebuild',
+              click() {
+                storage.rebuild()
+              }
             }
           ]
+      },
+      {
+        label: 'Debug',
+        click() {
+          win.webContents.openDevTools()
+        }
       }
   ])
   Menu.setApplicationMenu(menu); 
