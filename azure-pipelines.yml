@@ -21,7 +21,7 @@ steps:
   displayName: 'npm install and build'
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.BinariesDirectory)/KHMovers-win32-x64'
+    rootFolderOrFile: '$(System.DefaultWorkingDirectory)/KHMovers-win32-x64'
     includeRootFolder: true
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/KHMovers-win32-x64-$(Build.BuildId).zip'
